@@ -202,3 +202,57 @@ FLUSH PRIVILEGES;
 
 # Reiniciar contenedor WordPress
 docker restart wordpress-app
+
+Crear el directorio del proyecto
+mkdir -p ~/wordpress
+cd ~/wordpress
+nano docker-compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: wordpress-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: "la contra"
+      MYSQL_ROOT_PASSWORD: "la contra"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress-app
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: "la contra"
+    depends_on:
+      - db
+    volumes:
+      - wp_data:/var/www/html
+
+volumes:
+  db_data:
+  wp_data:
+
+se despliegan los contenedores 
+docker compose up -d
+docker ps
+si se pone bruto usar:
+
+docker exec -it wordpress-db bash mysql -u root -pbash-4.2# mysql -y root -p
+show databases
+SELECT user, host FROM mysql.user;
+ALTER USER 'wpuser'@'%' IDENTIFIED BY 'wppass';
+FLUSH PRIVILEGES;
+docker restart wordpress-app
+
+pa salir exit;
+reiniciar y listo
