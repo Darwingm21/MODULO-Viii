@@ -85,19 +85,120 @@ FLUSH PRIVILEGES;
 
 docker restart wordpress-app
 
+# Práctica 1: Instalación y configuración de Docker
 
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf install docker-ce docker-ce-cli containerd.io -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo docker version
 
+# Descargar imagen NGINX y crear contenedor con volumen persistente
+sudo docker pull nginx
+mkdir -p /home/website
+sudo docker run -d --name nginx-web \
+  -p 8888:80 \
+  -v /home/website:/usr/share/nginx/html \
+  nginx
 
+# Crear página HTML
+nano /home/website/index.html
+# Contenido:
+# <!DOCTYPE html>
+# <html lang="es">
+# <head>
+#     <meta charset="UTF-8">
+#     <title>Mi Página Web</title>
+# </head>
+# <body>
+#     <h1>Darwing Peña</h1>
+#     <p>Matrícula: 20242690</p>
+# </body>
+# </html>
 
+# Probar en navegador
+http://127.0.0.1:8888
+sudo docker ps
 
+# ------------------------------------------------------------
 
+# Práctica 2: Instalación de Portainer
+docker volume create portainer_data
+docker run -d \
+  -p 8000:8000 \
+  -p 9443:9443 \
+  --name portainer \
+  --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  portainer/portainer-ce:lts
 
+# Acceder:
+https://localhost:9443
 
+# ------------------------------------------------------------
 
+# Práctica 3: Despliegue de contenedor de WordPress usando Docker Compose
+sudo dnf install docker-compose-plugin -y
+docker compose version
 
+# Crear carpeta de proyecto
+mkdir ~/wordpress 
+cd ~/wordpress
 
+# Crear archivo docker-compose.yml
+nano docker-compose.yml
+# Contenido:
+# version: '3.8'
+#
+# services:
+#   db:
+#     image: mysql:5.7
+#     container_name: wordpress-db
+#     restart: always
+#     environment:
+#       MYSQL_DATABASE: wordpress
+#       MYSQL_USER: wpuser
+#       MYSQL_PASSWORD: wppass
+#       MYSQL_ROOT_PASSWORD: rootpass
+#     volumes:
+#       - db_data:/var/lib/mysql
+#
+#   wordpress:
+#     image: wordpress:latest
+#     container_name: wordpress-app
+#     restart: always
+#     ports:
+#       - "8080:80"
+#     environment:
+#       WORDPRESS_DB_HOST: db:3306
+#       WORDPRESS_DB_NAME: wordpress
+#       WORDPRESS_DB_USER: wpuser
+#       WORDPRESS_DB_PASSWORD: wppass
+#     depends_on:
+#       - db
+#     volumes:
+#       - wp_data:/var/www/html
+#
+# volumes:
+#   db_data:
+#   wp_data:
 
+# Desplegar contenedores
+docker compose up -d
+docker ps
 
+# Probar en navegador
+http://127.0.0.1:8080
 
+# Acceso a MySQL
+docker exec -it wordpress-db bash
+mysql -u root -p
+# Contraseña: rootpass
+SHOW DATABASES;
+SELECT User, Host FROM mysql.user;
+ALTER USER 'wpuser'@'%' IDENTIFIED BY 'wppass';
+FLUSH PRIVILEGES;
 
-
+# Reiniciar contenedor WordPress
+docker restart wordpress-app
