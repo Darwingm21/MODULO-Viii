@@ -256,3 +256,6 @@ docker restart wordpress-app
 
 pa salir exit;
 reiniciar y listo
+un ejemplo de codigo de html
+<h1> titulo </h1>
+<p> contenido </p>
